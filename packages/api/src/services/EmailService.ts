@@ -118,7 +118,7 @@ public static compile({
   // preserve existing <img> tweak, then inject unsubscribe link
   const html0 = content.replace(/<img/g, "<img");
   const hasUnsubToken = /\{\{\s*unsubscribe\s*}}/i.test(html0);
-  const html = html0.replace(/\{\{\s*unsubscribe\s*}}/gi, unsubAnchor);
+  const html = html0.replace(/\{\{\s*unsubscribe\s*}}/gi, unsubUrl);
 
   if (isHtml) {
     // (optional) only append footer if user didn't place {{unsubscribe}} themselves
