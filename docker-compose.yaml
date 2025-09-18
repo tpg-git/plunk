@@ -61,3 +61,18 @@ services:
       interval: 5s
       timeout: 10s
       retries: 20
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    depends_on:
+      - postgresql
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local
+      PGADMIN_DEFAULT_PASSWORD: admin # change me
+    ports:
+      - "127.0.0.1:8081:80"   # visit http://127.0.0.1:8081
+  redisinsight:
+    image: redis/redisinsight:latest
+    depends_on:
+      - redis
+    ports:
+      - "127.0.0.1:5540:5540" # visit http://127.0.0.1:5540
