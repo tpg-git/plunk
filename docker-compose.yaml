@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  app:
+    # Build your edited fork
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # (Optional) name the image locally
+    image: plunk-fork:local
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      # Required infra
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/postgres}
+
+      # Plunk app config
+      JWT_SECRET: ${JWT_SECRET}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_SES_CONFIGURATION_SET: ${AWS_SES_CONFIGURATION_SET}
+
+      # URLs (APP_URI is your site; API_URI is your site + /api)
+      NEXT_PUBLIC_API_URI: ${API_URI}
+      API_URI: ${API_URI}
+      APP_URI: ${APP_URI}
+
+      # Optional: keep signups on for initial admin creation
+      DISABLE_SIGNUPS: ${DISABLE_SIGNUPS:-False}
+
+    # For Coolify routing, just expose the internal port
+    expose:
+      - "3000"
+    # If running locally (outside Coolify), you can map the port instead:
+    # ports:
+    #   - "3000:3000"
+
+    # If your Dockerfile doesn't set the entrypoint already, uncomment:
+    # entrypoint: ["/app/entry.sh"]
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      retries: 5
+      timeout: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+
+volumes:
+  postgres_data:
